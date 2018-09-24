@@ -1,0 +1,36 @@
+{
+  "name": "cordova-plugin-floating-videobox",
+  "version": "0.1.0",
+  "description": "Cordova Floating Videobox Plugin",
+  "cordova": {
+    "id": "cordova-plugin-floating-videobox",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigeyex/cordova-plugin-floating-videobox.git"
+  },
+  "keywords": [
+    "cordova",
+    "local web server",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova-ios",
+      "version": ">=4.0.0-dev"
+    }
+  ],
+  "author": "bigeyex",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bigeyex/cordova-plugin-floating-videobox/issues"
+  },
+  "homepage": "https://github.com/bigeyex/cordova-plugin-floating-videobox",
+  "dependencies": {
+    "urijs": "^1.17.1"
+  }
+}
