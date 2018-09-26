@@ -36,7 +36,6 @@ static int fullScreenCornerButtonMargin = 24;
 }
 
 - (void)initFrameLayout {
-    self.backgroundColor = [UIColor colorWithRed:53/255.0 green:178/255.0 blue:226/255.0 alpha:1];
     self.layer.cornerRadius = 5;
 
     self.avPlayerView = [[MBAVPlayerView alloc] init];
@@ -46,10 +45,12 @@ static int fullScreenCornerButtonMargin = 24;
     [self.fullScreenButton addTarget:self action:@selector(toggleFullscreen) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.fullScreenButton];
     self.prevButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.prevButton addTarget:self action:@selector(onPrevButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.prevButton];
     self.nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [self.nextButton addTarget:self action:@selector(onNextButtonTapped) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.nextButton];
-    self.stepTextView = [[UITextView alloc] init];
+    self.stepTextView = [[UILabel alloc] init];
     self.stepTextView.text = @"2/3";
     self.stepTextView.font = [UIFont systemFontOfSize:textFontSize];
     self.stepTextView.textColor = [UIColor whiteColor];
@@ -63,10 +64,21 @@ static int fullScreenCornerButtonMargin = 24;
 
 
 - (void)layoutSubviews {
-    if(self.isFullScreen) {
+    if(self.isVideoOnly) {
+        self.frame = CGRectMake(self.videoOnlyX, self.videoOnlyY, self.videoOnlyWidth, self.videoOnlyHeight);
+        self.fullScreenButton.frame = CGRectZero;
+        self.prevButton.frame = CGRectZero;
+        self.nextButton.frame = CGRectZero;
+        self.stepTextView.frame = CGRectZero;
+        self.avPlayerView.frame = self.bounds;
+        [self setDraggable:NO];
+        
+        self.layer.masksToBounds = false;
+        self.backgroundColor = [UIColor clearColor];
+    }
+    else if(self.isFullScreen) {
         self.layer.masksToBounds = false;
         self.avPlayerView.frame = self.bounds;
-        self.avPlayerView.layer.cornerRadius = 0;
         [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
         self.fullScreenButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-fullScreenCornerButtonMargin, fullScreenCornerButtonMargin, buttonSizeL, buttonSizeL);
         [self.prevButton setImage:[UIImage imageNamed:@"icon-video-big-prev.png"] forState:UIControlStateNormal];
@@ -77,6 +89,7 @@ static int fullScreenCornerButtonMargin = 24;
         self.stepTextView.hidden = YES;
     }
     else {
+        self.backgroundColor = [UIColor colorWithRed:53/255.0 green:178/255.0 blue:226/255.0 alpha:1];
         self.layer.masksToBounds = true;
         self.avPlayerView.frame = CGRectMake(boxMargin, boxMargin, self.bounds.size.width-2*boxMargin, self.bounds.size.height-boxMargin-bottomPaneHeight);
         [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-small-fullscreen.png"] forState:UIControlStateNormal];
@@ -87,14 +100,24 @@ static int fullScreenCornerButtonMargin = 24;
         self.nextButton.frame = CGRectMake(self.bounds.size.width-buttonSizeXS-boxMargin-controlMargin, self.bounds.size.height-boxMargin-controlMargin-buttonSizeXS, buttonSizeXS, buttonSizeXS);
 
         self.stepTextView.hidden = NO;
-        [self.stepTextView sizeToFit];
-        self.stepTextView.frame = CGRectMake(self.bounds.size.width/2-self.stepTextView.frame.size.width/2, self.bounds.size.height-textHeight-boxMargin,
-                                             self.stepTextView.frame.size.width, self.stepTextView.frame.size.height);
+        [self calculateStepTextDimension];
     }
     
 }
 
+- (void)setStepText:(NSString*)text {
+    self.stepTextView.text = text;
+    [self calculateStepTextDimension];
+}
 
+- (void)calculateStepTextDimension {
+    [self.stepTextView sizeToFit];
+    self.stepTextView.frame = CGRectMake(self.bounds.size.width/2-self.stepTextView.frame.size.width/2, self.bounds.size.height-self.stepTextView.frame.size.height-boxMargin-controlMargin, self.stepTextView.frame.size.width, self.stepTextView.frame.size.height);
+}
+
+- (void)enterVideoOnlyMode {
+    
+}
 
 - (void)enterFullScreen {
     self.isFullScreen = YES;
@@ -145,5 +168,28 @@ static int fullScreenCornerButtonMargin = 24;
     }
     
 }
+
+- (void)onPrevButtonTapped {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"MBVideoBoxPrevButtonTapped" object:nil];
+}
+
+- (void)onNextButtonTapped {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"MBVideoBoxNextButtonTapped" object:nil];
+}
+
+- (void)playBundleVideo: (NSString*)location {
+//         NSURL *fileURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@www/video/touch-head/pre-video.mp4",resourceURLString]];
+    NSURL *fileURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",[[NSBundle mainBundle] resourceURL], location]];
+    [self.avPlayerView playVideoWithURL:fileURL];
+}
+
+- (void)pauseVideo {
+    [self.avPlayerView.avPlayer pause];
+}
+
+- (void)resumeVideo {
+    [self.avPlayerView.avPlayer play];
+}
+
 
 @end

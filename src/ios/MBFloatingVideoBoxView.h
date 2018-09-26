@@ -20,13 +20,23 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) UIButton *prevButton;
 @property (nonatomic) UIButton *nextButton;
 @property (nonatomic) UIButton *finishButton;
-@property (nonatomic) UITextView *stepTextView;
+@property (nonatomic) UILabel *stepTextView;
 
 @property (nonatomic) bool isFullScreen;
+@property (nonatomic) bool isVideoOnly;
 @property (nonatomic) bool isFinishButtonVisible;
+@property (nonatomic) int videoOnlyX;
+@property (nonatomic) int videoOnlyY;
+@property (nonatomic) int videoOnlyWidth;
+@property (nonatomic) int videoOnlyHeight;
+
 
 - (void)enterFullScreen;
 - (void)exitFullScreen;
+- (void)setStepText:(NSString*)text;
+- (void)playBundleVideo: (NSString*)location;
+- (void)pauseVideo;
+- (void)resumeVideo;
 
 @end
 

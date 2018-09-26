@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic) AVPlayer *avPlayer;
 
+- (void)playVideoWithURL: (NSURL*)url;
+
 @end
 
 NS_ASSUME_NONNULL_END

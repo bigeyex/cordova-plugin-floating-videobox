@@ -31,7 +31,6 @@
 #define ERROR_PATH              @"error"
 
 @interface CDVFloatingVideobox()
-- (GCDWebServerResponse*)_responseWithContentsOfDirectory:(NSString*)path;
 @end
 
 
@@ -41,20 +40,88 @@
     self.floatingBoxView = [[MBFloatingVideoBoxView alloc] init];
     [ [ [ self viewController ] view ] addSubview:self.floatingBoxView];
     self.floatingBoxView.hidden = YES;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prevButtonCallback) name:@"MBVideoBoxPrevButtonTapped" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nextButtonCallback) name:@"MBVideoBoxNextButtonTapped" object:nil];
 }
 
 - (void)setAttribute : (CDVInvokedUrlCommand*)command {
     NSString* key = [command.arguments objectAtIndex:0];
     NSString* value = [command.arguments objectAtIndex:1];
-}
-- (void)playVideo : (CDVInvokedUrlCommand*)command {
     
+    if([key isEqualToString:@"showPrevButton"]) {
+        self.floatingBoxView.prevButton.hidden = ![value boolValue];
+    }
+    else if([key isEqualToString:@"showNextButton"]) {
+        self.floatingBoxView.nextButton.hidden = ![value boolValue];
+    }
+    else if([key isEqualToString:@"fullscreen"]) {
+        if([value boolValue]) {
+            [self.floatingBoxView enterFullScreen];
+        }
+        else {
+            [self.floatingBoxView exitFullScreen];
+        }
+    }
+    else if([key isEqualToString:@"x"]) {
+        self.floatingBoxView.videoOnlyX = [value intValue];
+    }
+    else if([key isEqualToString:@"y"]) {
+        self.floatingBoxView.videoOnlyY = [value intValue];
+    }
+    else if([key isEqualToString:@"width"]) {
+        self.floatingBoxView.videoOnlyWidth = [value intValue];
+    }
+    else if([key isEqualToString:@"height"]) {
+        self.floatingBoxView.videoOnlyHeight = [value intValue];
+    }
+    else if([key isEqualToString:@"videoonly"]) {
+        self.floatingBoxView.isVideoOnly = [value boolValue];
+        [self.floatingBoxView layoutSubviews];
+    }
+    else if([key isEqualToString:@"showStepText"]) {
+        self.floatingBoxView.stepTextView.hidden = ![value boolValue];
+    }
+    else if([key isEqualToString:@"setStepText"]) {
+        [self.floatingBoxView setStepText:value];
+    }
+}
+
+- (void)show : (CDVInvokedUrlCommand*)command {
+    self.floatingBoxView.hidden = NO;
+    [self.floatingBoxView resumeVideo];
+}
+
+- (void)hide : (CDVInvokedUrlCommand*)command {
+    self.floatingBoxView.hidden = YES;
+    [self.floatingBoxView pauseVideo];
+}
+
+- (void)playBundleVideo : (CDVInvokedUrlCommand*)command {
+    [self.floatingBoxView playBundleVideo:[command.arguments objectAtIndex:0]];
 }
 - (void)onPrevButton : (CDVInvokedUrlCommand*)command {
-    
+    self.onPrevJsCallback = command.callbackId;
 }
+
 - (void)onNextButton : (CDVInvokedUrlCommand*)command {
-    
+    self.onNextJsCallback = command.callbackId;
+}
+
+- (void)prevButtonCallback {
+    if(self.onPrevJsCallback) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [result setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:result callbackId:self.onPrevJsCallback];
+    }
+}
+
+- (void)nextButtonCallback {
+    if(self.onPrevJsCallback) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [result setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:result callbackId:self.onNextJsCallback];
+    }
 }
 
 @end

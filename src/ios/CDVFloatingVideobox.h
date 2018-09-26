@@ -18,14 +18,20 @@
  */
 
 #import <Cordova/CDV.h>
+#import "MBFloatingVideoBoxView.h"
 
 @interface CDVFloatingVideobox : CDVPlugin
 
 - (void)setAttribute : (CDVInvokedUrlCommand*)command;
-- (void)playVideo : (CDVInvokedUrlCommand*)command;
+- (void)playBundleVideo : (CDVInvokedUrlCommand*)command;
 - (void)onPrevButton : (CDVInvokedUrlCommand*)command;
 - (void)onNextButton : (CDVInvokedUrlCommand*)command;
+- (void)show : (CDVInvokedUrlCommand*)command;
+- (void)hide : (CDVInvokedUrlCommand*)command;
 
-@property (nonatomic) UIView *floatingBoxView;
+@property (nonatomic) MBFloatingVideoBoxView *floatingBoxView;
+
+@property (nonatomic) NSString *onPrevJsCallback;
+@property (nonatomic) NSString *onNextJsCallback;
 
 @end

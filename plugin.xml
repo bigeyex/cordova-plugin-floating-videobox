@@ -33,7 +33,6 @@
         <config-file target="config.xml" parent="/*">
 		    <feature name="Videobox">
 			    <param name="ios-package" value="CDVFloatingVideobox"/>
-			    <param name="onload" value="true"/>
 		    </feature>
             <preference name="CDVFloatingVideoboxStartOnSimulator" value="true" />
 					<access origin="http://localhost" />
