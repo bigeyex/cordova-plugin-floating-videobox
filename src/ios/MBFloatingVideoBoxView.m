@@ -10,7 +10,9 @@
 #import "UIView+draggable.h"
 
 
-@implementation MBFloatingVideoBoxView
+@implementation MBFloatingVideoBoxView {
+    int _iphoneXSensorInsetLength;
+}
 
 static int defaultVideoWidth = 320;
 static int defaultVideoHeight = 240;
@@ -80,11 +82,11 @@ static int fullScreenCornerButtonMargin = 24;
         self.layer.masksToBounds = false;
         self.avPlayerView.frame = self.bounds;
         [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
-        self.fullScreenButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-fullScreenCornerButtonMargin, fullScreenCornerButtonMargin, buttonSizeL, buttonSizeL);
+        self.fullScreenButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-fullScreenCornerButtonMargin-_iphoneXSensorInsetLength, fullScreenCornerButtonMargin, buttonSizeL, buttonSizeL);
         [self.prevButton setImage:[UIImage imageNamed:@"icon-video-big-prev.png"] forState:UIControlStateNormal];
         self.prevButton.frame = CGRectMake(controlMargin*2, self.bounds.size.height/2-buttonSizeL/2, buttonSizeL, buttonSizeL);
         [self.nextButton setImage:[UIImage imageNamed:@"icon-video-big-next.png"] forState:UIControlStateNormal];
-        self.nextButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-controlMargin*2, self.bounds.size.height/2-buttonSizeL/2, buttonSizeL, buttonSizeL);
+        self.nextButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-controlMargin*2-_iphoneXSensorInsetLength, self.bounds.size.height/2-buttonSizeL/2, buttonSizeL, buttonSizeL);
         
         self.stepTextView.hidden = YES;
     }
@@ -146,7 +148,11 @@ static int fullScreenCornerButtonMargin = 24;
     CGRect windowFrame = [[UIApplication sharedApplication].windows.lastObject frame];
     int calculatedWidth = defaultVideoWidth + 2*boxMargin;
     int calculatedHeight = defaultVideoHeight + boxMargin + bottomPaneHeight;
-    return CGRectMake(windowFrame.size.width-calculatedWidth, 0, calculatedWidth, calculatedHeight);
+    return CGRectMake(windowFrame.size.width-calculatedWidth-_iphoneXSensorInsetLength, 0, calculatedWidth, calculatedHeight);
+}
+
+- (bool)isIPhoneX {
+    return [[UIScreen mainScreen] bounds].size.height == 375.0; // this is iPhone X height in landscape
 }
 
 - (void)updateMetricByDevice {
@@ -165,6 +171,7 @@ static int fullScreenCornerButtonMargin = 24;
         textFontSize = textFontSize/1.5;
         fullScreenBottomMargin = fullScreenBottomMargin/1.5;
         fullScreenCornerButtonMargin = fullScreenCornerButtonMargin/1.5;
+        _iphoneXSensorInsetLength = [self isIPhoneX] ? 50 : 0;
     }
     
 }

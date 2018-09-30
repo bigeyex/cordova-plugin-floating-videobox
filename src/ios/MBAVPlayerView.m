@@ -8,7 +8,10 @@
 
 #import "MBAVPlayerView.h"
 
-@implementation MBAVPlayerView
+@implementation MBAVPlayerView {
+    bool _wasPlayingBeforeEnterBackground;
+    bool _wasPlayingBeforeInterrupted;
+}
 
 + (Class)layerClass
 {
@@ -34,6 +37,7 @@
     videoLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [(AVPlayerLayer *)self.layer setPlayer:self.avPlayer];
     
+    self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(itemDidFinishPlaying:) name:AVPlayerItemDidPlayToEndTimeNotification object:[self.avPlayer currentItem]];
     
     NSError *error = [[NSError alloc] init];
@@ -51,13 +55,28 @@
                                              selector:@selector(resumePlayWhenReenterForeground)
                                                  name:UIApplicationDidBecomeActiveNotification
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(savePlayingStateBeforeEnterBackground)
+                                                 name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
     
+    UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+    [self addGestureRecognizer:tapRecognizer];
+
 }
 
 
 - (void)itemDidFinishPlaying:(NSNotification *)notification {
     AVPlayerItem *player = [notification object];
     [player seekToTime:kCMTimeZero];
+}
+
+- (void)handleTap:(UITapGestureRecognizer *)sender
+{
+    if (sender.state == UIGestureRecognizerStateEnded)
+    {
+        [self.avPlayer play];
+    }
 }
 
 - (void)playVideoWithURL: (NSURL*)url {
@@ -68,8 +87,14 @@
     
 }
 
+- (void)savePlayingStateBeforeEnterBackground {
+    _wasPlayingBeforeEnterBackground = [self isPlayerPlaying];
+}
+
 - (void)resumePlayWhenReenterForeground {
-    [self.avPlayer play];
+    if(_wasPlayingBeforeEnterBackground) {
+        [self.avPlayer play];
+    }
 }
 
 - (void)handleAudioSessionInterruption:(NSNotification*)notification {
@@ -79,21 +104,27 @@
     
     switch (interruptionType.unsignedIntegerValue) {
         case AVAudioSessionInterruptionTypeBegan:{
-            // • Audio has stopped, already inactive
-            // • Change state of UI, etc., to reflect non-playing state
+            _wasPlayingBeforeInterrupted = [self isPlayerPlaying];
         } break;
         case AVAudioSessionInterruptionTypeEnded:{
             // • Make session active
             // • Update user interface
             // • AVAudioSessionInterruptionOptionShouldResume option
+            [[AVAudioSession sharedInstance] setActive: YES error: nil];
             if (interruptionOption.unsignedIntegerValue == AVAudioSessionInterruptionOptionShouldResume) {
                 // Here you should continue playback.
-                [self.avPlayer play];
+                if(_wasPlayingBeforeInterrupted){
+                    [self.avPlayer play];
+                }
             }
         } break;
         default:
             break;
     }
+}
+
+- (bool)isPlayerPlaying {
+    return (self.avPlayer.rate != 0) && (self.avPlayer.error == nil);
 }
 
 
