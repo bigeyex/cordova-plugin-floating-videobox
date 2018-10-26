@@ -12,6 +12,7 @@
 
 @implementation MBFloatingVideoBoxView {
     int _iphoneXSensorInsetLength;
+    UIButton * _replayButton;
 }
 
 static int defaultVideoWidth = 320;
@@ -28,81 +29,148 @@ static int textFontSize = 22;
 static int fullScreenBottomMargin = 46;
 static int fullScreenCornerButtonMargin = 24;
 
+static float fullscreenButtonHeightRatioNormal = 0.125;
+static float fullscreenButtonHeightRatioFullScreen = 0.0704;
+static float fullscreenButtonMarginHeightRatioNormal = 0.0459;
+static float fullscreenButtonMarginHeightRatioFullScreen = 0.0261;
+
+static float replayButtonHeightRatioNormal = 0.275;
+static float replayButtonHeightRatioFullScreen = 0.1107;
+
 - (instancetype)init {
     [self updateMetricByDevice];
     self = [super initWithFrame:[self getWindowedFrame]];
     if (self) {
         [self initFrameLayout];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onVideoFinishPlay) name:@"MBVideoPlayFinished" object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onVideoStartPlay) name:@"MBVideoPlayStarted" object:nil];
     }
     return self;
 }
 
 - (void)initFrameLayout {
-    self.layer.cornerRadius = 5;
+    self.layer.cornerRadius = 0;
 
     self.avPlayerView = [[MBAVPlayerView alloc] init];
+    self.avPlayerView.autoReplay = NO;
     [self addSubview:self.avPlayerView];
     
     self.fullScreenButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [self.fullScreenButton addTarget:self action:@selector(toggleFullscreen) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.fullScreenButton];
-    self.prevButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.prevButton addTarget:self action:@selector(onPrevButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:self.prevButton];
-    self.nextButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [self.nextButton addTarget:self action:@selector(onNextButtonTapped) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:self.nextButton];
-    self.stepTextView = [[UILabel alloc] init];
-    self.stepTextView.text = @"2/3";
-    self.stepTextView.font = [UIFont systemFontOfSize:textFontSize];
-    self.stepTextView.textColor = [UIColor whiteColor];
-    self.stepTextView.backgroundColor = [UIColor clearColor];
-    [self addSubview:self.stepTextView];
+    
+    _replayButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_replayButton addTarget:self action:@selector(replay) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:_replayButton];
 
+    self.layer.masksToBounds = NO;
+    self.backgroundColor = [UIColor clearColor];
     
     [self layoutSubviews];
     [self enableDragging];
+    
 }
 
+- (void)onVideoFinishPlay {
+    _replayButton.hidden = NO;
+}
+
+- (void)onVideoStartPlay {
+    _replayButton.hidden = YES;
+}
+
+- (void)clearShadow {
+    self.layer.shadowOffset = CGSizeMake(0, 0);
+    self.layer.shadowColor = [[UIColor clearColor] CGColor];
+    self.layer.cornerRadius = 0.0f;
+    self.layer.shadowRadius = 0.0f;
+    self.layer.shadowOpacity = 0.00f;
+}
+
+- (void)makeShadow {
+    self.layer.shadowRadius  = 5;
+    self.layer.shadowColor   = [UIColor colorWithRed:53/255.0 green:178/255.0 blue:226/255.0 alpha:1].CGColor;
+    self.layer.shadowOffset  = CGSizeMake(0.0, 0.0);
+    self.layer.shadowOpacity = 0.3;//0.9f;
+    
+    UIEdgeInsets shadowInsets     = UIEdgeInsetsMake(0, 0, -1.5f, 0);
+    UIBezierPath *shadowPath      = [UIBezierPath bezierPathWithRect:UIEdgeInsetsInsetRect(self.bounds, shadowInsets)];
+    self.layer.shadowPath    = shadowPath.CGPath;
+}
+
+- (void)drawToggleFullScreenButton {
+    float buttonSize = 0;
+    float buttonMargin = 0;
+    if (self.isFullScreen) {
+        buttonSize = self.bounds.size.height * fullscreenButtonHeightRatioFullScreen;
+        buttonMargin = self.bounds.size.height * fullscreenButtonMarginHeightRatioFullScreen;
+    }
+    else {
+        buttonSize = self.bounds.size.height * fullscreenButtonHeightRatioNormal;
+        buttonMargin = self.bounds.size.height * fullscreenButtonMarginHeightRatioNormal;
+    }
+    
+    [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
+    self.fullScreenButton.frame = CGRectMake(self.bounds.size.width - (buttonSize + buttonMargin), buttonMargin, buttonSize, buttonSize);
+    self.fullScreenButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
+}
+
+- (void)drawReplayButton {
+    float replayButtonSize = 0;
+    if (self.isFullScreen) {
+        replayButtonSize = self.bounds.size.height * replayButtonHeightRatioFullScreen;
+    }
+    else {
+        replayButtonSize = self.bounds.size.height * replayButtonHeightRatioNormal;
+    }
+    
+    [_replayButton setImage:[UIImage imageNamed:@"icon-video-replay.png"] forState:UIControlStateNormal];
+    _replayButton.contentMode = UIViewContentModeScaleAspectFit;
+    _replayButton.frame = CGRectMake((self.bounds.size.width - replayButtonSize)/2, (self.bounds.size.height - replayButtonSize)/2, replayButtonSize, replayButtonSize);
+}
+
+- (void)drawVideoOnly {
+    self.frame = CGRectMake(self.videoOnlyX, self.videoOnlyY, self.videoOnlyWidth, self.videoOnlyHeight);
+    self.fullScreenButton.frame = CGRectZero;
+    _replayButton.frame = CGRectZero;
+    self.avPlayerView.frame = self.bounds;
+    
+    self.layer.masksToBounds = YES;
+    self.backgroundColor = [UIColor clearColor];
+    [self clearShadow];
+}
+
+- (void)drawFullScreen {
+    self.avPlayerView.frame = self.bounds;
+    [self drawToggleFullScreenButton];
+    [self drawReplayButton];
+    self.layer.masksToBounds = YES;
+    self.backgroundColor = [UIColor blackColor];
+    [self clearShadow];
+}
+
+- (void)drawNormal {
+    self.avPlayerView.frame = CGRectMake(boxMargin, boxMargin, self.bounds.size.width-2*boxMargin, self.bounds.size.height-2*boxMargin);
+    [self drawToggleFullScreenButton];
+    [self drawReplayButton];
+    self.layer.masksToBounds = NO;
+    self.backgroundColor = [UIColor whiteColor];
+    [self makeShadow];
+}
 
 - (void)layoutSubviews {
     if(self.isVideoOnly) {
-        self.frame = CGRectMake(self.videoOnlyX, self.videoOnlyY, self.videoOnlyWidth, self.videoOnlyHeight);
-        self.fullScreenButton.frame = CGRectZero;
-        self.prevButton.frame = CGRectZero;
-        self.nextButton.frame = CGRectZero;
-        self.stepTextView.frame = CGRectZero;
-        self.avPlayerView.frame = self.bounds;
+        [self drawVideoOnly];
+        self.avPlayerView.autoReplay = YES;
         [self setDraggable:NO];
-        
-        self.layer.masksToBounds = false;
-        self.backgroundColor = [UIColor clearColor];
     }
     else if(self.isFullScreen) {
-        self.layer.masksToBounds = false;
-        self.avPlayerView.frame = self.bounds;
-        [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
-        self.fullScreenButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-fullScreenCornerButtonMargin-_iphoneXSensorInsetLength, fullScreenCornerButtonMargin, buttonSizeL, buttonSizeL);
-        [self.prevButton setImage:[UIImage imageNamed:@"icon-video-big-prev.png"] forState:UIControlStateNormal];
-        self.prevButton.frame = CGRectMake(controlMargin*2, self.bounds.size.height/2-buttonSizeL/2, buttonSizeL, buttonSizeL);
-        [self.nextButton setImage:[UIImage imageNamed:@"icon-video-big-next.png"] forState:UIControlStateNormal];
-        self.nextButton.frame = CGRectMake(self.bounds.size.width-buttonSizeL-controlMargin*2-_iphoneXSensorInsetLength, self.bounds.size.height/2-buttonSizeL/2, buttonSizeL, buttonSizeL);
-        
-        self.stepTextView.hidden = YES;
+        self.avPlayerView.autoReplay = NO;
+        [self drawFullScreen];
     }
     else {
-        self.backgroundColor = [UIColor colorWithRed:53/255.0 green:178/255.0 blue:226/255.0 alpha:1];
-        self.layer.masksToBounds = true;
-        self.avPlayerView.frame = CGRectMake(boxMargin, boxMargin, self.bounds.size.width-2*boxMargin, self.bounds.size.height-boxMargin-bottomPaneHeight);
-        [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-small-fullscreen.png"] forState:UIControlStateNormal];
-        self.fullScreenButton.frame = CGRectMake(self.bounds.size.width-buttonSizeS-boxMargin, boxMargin, buttonSizeS, buttonSizeS);
-        [self.prevButton setImage:[UIImage imageNamed:@"icon-video-small-prev.png"] forState:UIControlStateNormal];
-        self.prevButton.frame = CGRectMake(boxMargin+controlMargin, self.bounds.size.height-boxMargin-controlMargin-buttonSizeXS, buttonSizeXS, buttonSizeXS);
-        [self.nextButton setImage:[UIImage imageNamed:@"icon-video-small-next.png"] forState:UIControlStateNormal];
-        self.nextButton.frame = CGRectMake(self.bounds.size.width-buttonSizeXS-boxMargin-controlMargin, self.bounds.size.height-boxMargin-controlMargin-buttonSizeXS, buttonSizeXS, buttonSizeXS);
-
-        self.stepTextView.hidden = NO;
-        [self calculateStepTextDimension];
+        self.avPlayerView.autoReplay = NO;
+        [self drawNormal];
     }
     
 }
@@ -144,10 +212,15 @@ static int fullScreenCornerButtonMargin = 24;
     }
 }
 
+- (void)replay {
+    [self.avPlayerView replayCurrentVideo];
+}
+
 - (CGRect)getWindowedFrame {
     CGRect windowFrame = [[UIApplication sharedApplication].windows.lastObject frame];
-    int calculatedWidth = defaultVideoWidth + 2*boxMargin;
-    int calculatedHeight = defaultVideoHeight + boxMargin + bottomPaneHeight;
+    int calculatedWidth = defaultVideoWidth + 2 * boxMargin;
+//    int calculatedHeight = defaultVideoHeight + boxMargin + bottomPaneHeight;
+    int calculatedHeight = defaultVideoHeight + 2 * boxMargin;
     return CGRectMake(windowFrame.size.width-calculatedWidth-_iphoneXSensorInsetLength, 0, calculatedWidth, calculatedHeight);
 }
 
@@ -185,7 +258,6 @@ static int fullScreenCornerButtonMargin = 24;
 }
 
 - (void)playBundleVideo: (NSString*)location {
-//         NSURL *fileURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@www/video/touch-head/pre-video.mp4",resourceURLString]];
     NSURL *fileURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",[[NSBundle mainBundle] resourceURL], location]];
     [self.avPlayerView playVideoWithURL:fileURL];
 }

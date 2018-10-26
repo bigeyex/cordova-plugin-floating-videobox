@@ -62,6 +62,7 @@
 			<resource-file src="src/ios/Assets/icon-video-small-next.png" target="icon-video-small-next.png" />
 			<resource-file src="src/ios/Assets/icon-video-small-prev.png" target="icon-video-small-prev.png" />
 			<resource-file src="src/ios/Assets/icon-video-small-play.png" target="icon-video-small-play.png" />
+      <resource-file src="src/ios/Assets/icon-video-replay.png" target="icon-video-replay.png" />
 
         <info>
     		</info>

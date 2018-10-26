@@ -14,8 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MBAVPlayerView : UIView
 
 @property (nonatomic) AVPlayer *avPlayer;
+@property (nonatomic) bool autoReplay;
 
 - (void)playVideoWithURL: (NSURL*)url;
+- (void)replayCurrentVideo;
 
 @end
 

@@ -28,7 +28,6 @@
 }
 
 - (void)layoutFrame {
-
     self.avPlayer = [[AVPlayer alloc] init];
     self.avPlayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     
@@ -65,10 +64,15 @@
 
 }
 
-
 - (void)itemDidFinishPlaying:(NSNotification *)notification {
-    AVPlayerItem *player = [notification object];
-    [player seekToTime:kCMTimeZero];
+    if (self.autoReplay) {
+        AVPlayerItem *player = [notification object];
+        [player seekToTime:kCMTimeZero];
+    }
+    else {
+        [self.avPlayer pause];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"MBVideoPlayFinished" object:nil];
+    }
 }
 
 - (void)handleTap:(UITapGestureRecognizer *)sender
@@ -79,10 +83,19 @@
     }
 }
 
+- (void)replayCurrentVideo {
+    if (self.avPlayer.currentItem) {
+        [self.avPlayer seekToTime:kCMTimeZero];
+        [self.avPlayer play];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"MBVideoPlayStarted" object:nil];
+    }
+}
+
 - (void)playVideoWithURL: (NSURL*)url {
     if(url) {
         [self.avPlayer replaceCurrentItemWithPlayerItem:[AVPlayerItem playerItemWithURL:url]];
         [self.avPlayer play];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"MBVideoPlayStarted" object:nil];
     }
     
 }
