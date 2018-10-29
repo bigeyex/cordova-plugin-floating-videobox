@@ -104,13 +104,14 @@ static float replayButtonHeightRatioFullScreen = 0.1107;
     if (self.isFullScreen) {
         buttonSize = self.bounds.size.height * fullscreenButtonHeightRatioFullScreen;
         buttonMargin = self.bounds.size.height * fullscreenButtonMarginHeightRatioFullScreen;
+        [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
     }
     else {
         buttonSize = self.bounds.size.height * fullscreenButtonHeightRatioNormal;
         buttonMargin = self.bounds.size.height * fullscreenButtonMarginHeightRatioNormal;
+        [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-small-fullscreen.png"] forState:UIControlStateNormal];
     }
     
-    [self.fullScreenButton setImage:[UIImage imageNamed:@"icon-video-big-fullscreen.png"] forState:UIControlStateNormal];
     self.fullScreenButton.frame = CGRectMake(self.bounds.size.width - (buttonSize + buttonMargin), buttonMargin, buttonSize, buttonSize);
     self.fullScreenButton.imageView.contentMode = UIViewContentModeScaleAspectFit;
 }
