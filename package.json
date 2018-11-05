@@ -18,12 +18,10 @@
     "ecosystem:cordova",
     "cordova-ios"
   ],
-  "engines": [
-    {
-      "name": "cordova-ios",
-      "version": ">=4.0.0-dev"
-    }
-  ],
+  "engines": {
+    "name": "cordova-ios",
+    "version": ">=4.3.0-dev"
+  },
   "author": "bigeyex",
   "license": "Apache-2.0",
   "bugs": {
