@@ -29,16 +29,14 @@
 
     <!-- ios -->
     <platform name="ios">
-
-        <config-file target="config.xml" parent="/*">
+      <config-file target="config.xml" parent="/*">
         <feature name="Videobox">
           <param name="ios-package" value="CDVFloatingVideobox"/>
         </feature>
-            <preference name="CDVFloatingVideoboxStartOnSimulator" value="true" />
-          <access origin="http://localhost" />
-          <allow-navigation href="http://localhost:*/*" />
-        </config-file>
-
+        <preference name="CDVFloatingVideoboxStartOnSimulator" value="true" />
+        <access origin="http://localhost" />
+        <allow-navigation href="http://localhost:*/*" />
+      </config-file>
       <js-module src="www/plugin.js" name="videobox">
         <clobbers target="videobox" />
       </js-module>
@@ -67,5 +65,12 @@
       <info>
       </info>
 
+    </platform>
+
+    <!-- android -->
+    <platform name="android">
+      <js-module src="www/plugin.js" name="videobox">
+        <clobbers target="videobox" />
+      </js-module>
     </platform>
 </plugin>
