@@ -31,41 +31,41 @@
     <platform name="ios">
 
         <config-file target="config.xml" parent="/*">
-		    <feature name="Videobox">
-			    <param name="ios-package" value="CDVFloatingVideobox"/>
-		    </feature>
+        <feature name="Videobox">
+          <param name="ios-package" value="CDVFloatingVideobox"/>
+        </feature>
             <preference name="CDVFloatingVideoboxStartOnSimulator" value="true" />
-					<access origin="http://localhost" />
-					<allow-navigation href="http://localhost:*/*" />
+          <access origin="http://localhost" />
+          <allow-navigation href="http://localhost:*/*" />
         </config-file>
 
-			<js-module src="www/plugin.js" name="videobox">
+      <js-module src="www/plugin.js" name="videobox">
         <clobbers target="videobox" />
-			</js-module>
+      </js-module>
         
-	    <header-file src="src/ios/CDVFloatingVideobox.h" />
-	    <source-file src="src/ios/CDVFloatingVideobox.m" />
+      <header-file src="src/ios/CDVFloatingVideobox.h" />
+      <source-file src="src/ios/CDVFloatingVideobox.m" />
 
-			<header-file src="src/ios/MBAVPlayerView.h" />
-	    <source-file src="src/ios/MBAVPlayerView.m" />
-			<header-file src="src/ios/MBFloatingVideoBoxView.h" />
-	    <source-file src="src/ios/MBFloatingVideoBoxView.m" />
+      <header-file src="src/ios/MBAVPlayerView.h" />
+      <source-file src="src/ios/MBAVPlayerView.m" />
+      <header-file src="src/ios/MBFloatingVideoBoxView.h" />
+      <source-file src="src/ios/MBFloatingVideoBoxView.m" />
 
-	    <framework src="AVFoundation.framework" />
-			<framework src="UIView+draggable" type="podspec" spec="~> 1.1.0" />
+      <framework src="AVFoundation.framework" />
+      <framework src="UIView+draggable" type="podspec" spec="~> 1.1.0" />
 
-			<resource-file src="src/ios/Assets/icon-video-big-fullscreen.png" target="icon-video-big-fullscreen.png" />
-			<resource-file src="src/ios/Assets/icon-video-big-next.png" target="icon-video-big-next.png" />
-			<resource-file src="src/ios/Assets/icon-video-big-prev.png" target="icon-video-big-prev.png" />
-			<resource-file src="src/ios/Assets/icon-video-small-close.png" target="icon-video-small-close.png" />
-			<resource-file src="src/ios/Assets/icon-video-small-fullscreen.png" target="icon-video-small-fullscreen.png" />
-			<resource-file src="src/ios/Assets/icon-video-small-next.png" target="icon-video-small-next.png" />
-			<resource-file src="src/ios/Assets/icon-video-small-prev.png" target="icon-video-small-prev.png" />
-			<resource-file src="src/ios/Assets/icon-video-small-play.png" target="icon-video-small-play.png" />
+      <resource-file src="src/ios/Assets/icon-video-big-fullscreen.png" target="icon-video-big-fullscreen.png" />
+      <resource-file src="src/ios/Assets/icon-video-big-next.png" target="icon-video-big-next.png" />
+      <resource-file src="src/ios/Assets/icon-video-big-prev.png" target="icon-video-big-prev.png" />
+      <resource-file src="src/ios/Assets/icon-video-small-close.png" target="icon-video-small-close.png" />
+      <resource-file src="src/ios/Assets/icon-video-small-fullscreen.png" target="icon-video-small-fullscreen.png" />
+      <resource-file src="src/ios/Assets/icon-video-small-next.png" target="icon-video-small-next.png" />
+      <resource-file src="src/ios/Assets/icon-video-small-prev.png" target="icon-video-small-prev.png" />
+      <resource-file src="src/ios/Assets/icon-video-small-play.png" target="icon-video-small-play.png" />
       <resource-file src="src/ios/Assets/icon-video-replay.png" target="icon-video-replay.png" />
 
-        <info>
-    		</info>
+      <info>
+      </info>
 
     </platform>
 </plugin>
