@@ -5,7 +5,8 @@
   "cordova": {
     "id": "cordova-plugin-floating-videobox",
     "platforms": [
-      "ios"
+      "ios",
+      "android"
     ]
   },
   "repository": {
@@ -16,12 +17,9 @@
     "cordova",
     "local web server",
     "ecosystem:cordova",
-    "cordova-ios"
+    "cordova-ios",
+    "cordova-android"
   ],
-  "engines": {
-    "name": "cordova-ios",
-    "version": ">=4.3.0-dev"
-  },
   "author": "bigeyex",
   "license": "Apache-2.0",
   "bugs": {

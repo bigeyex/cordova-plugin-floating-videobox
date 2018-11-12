@@ -17,15 +17,20 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin id="cordova-plugin-floating-videobox" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-floating-videobox" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+  xmlns:android="http://schemas.android.com/apk/res/android">
     <name>CDVFloatingVideobox</name>
     <description>Cordova Floating Video Box Plugin</description>
     <keywords>cordova, video</keywords>
     <repo>git+https://github.com/bigeyex/cordova-plugin-wkwebview-sandbox-webserver.git</repo>
 
     <engines>
-        <engine name="cordova-ios" version=">=4.1.0" />
+        <engine name="cordova" version=">=4.0.0"/>
     </engines>
+
+    <js-module src="www/plugin.js" name="videobox">
+      <clobbers target="videobox" />
+    </js-module>
 
     <!-- ios -->
     <platform name="ios">
@@ -37,9 +42,6 @@
         <access origin="http://localhost" />
         <allow-navigation href="http://localhost:*/*" />
       </config-file>
-      <js-module src="www/plugin.js" name="videobox">
-        <clobbers target="videobox" />
-      </js-module>
         
       <header-file src="src/ios/CDVFloatingVideobox.h" />
       <source-file src="src/ios/CDVFloatingVideobox.m" />
@@ -52,15 +54,15 @@
       <framework src="AVFoundation.framework" />
       <framework src="UIView+draggable" type="podspec" spec="~> 1.1.0" />
 
-      <resource-file src="src/ios/Assets/icon-video-big-fullscreen.png" target="icon-video-big-fullscreen.png" />
-      <resource-file src="src/ios/Assets/icon-video-big-next.png" target="icon-video-big-next.png" />
-      <resource-file src="src/ios/Assets/icon-video-big-prev.png" target="icon-video-big-prev.png" />
-      <resource-file src="src/ios/Assets/icon-video-small-close.png" target="icon-video-small-close.png" />
-      <resource-file src="src/ios/Assets/icon-video-small-fullscreen.png" target="icon-video-small-fullscreen.png" />
-      <resource-file src="src/ios/Assets/icon-video-small-next.png" target="icon-video-small-next.png" />
-      <resource-file src="src/ios/Assets/icon-video-small-prev.png" target="icon-video-small-prev.png" />
-      <resource-file src="src/ios/Assets/icon-video-small-play.png" target="icon-video-small-play.png" />
-      <resource-file src="src/ios/Assets/icon-video-replay.png" target="icon-video-replay.png" />
+      <resource-file src="res/icon-video-big-fullscreen.png" target="icon-video-big-fullscreen.png" />
+      <resource-file src="res/icon-video-big-next.png" target="icon-video-big-next.png" />
+      <resource-file src="res/icon-video-big-prev.png" target="icon-video-big-prev.png" />
+      <resource-file src="res/icon-video-small-close.png" target="icon-video-small-close.png" />
+      <resource-file src="res/icon-video-small-fullscreen.png" target="icon-video-small-fullscreen.png" />
+      <resource-file src="res/icon-video-small-next.png" target="icon-video-small-next.png" />
+      <resource-file src="res/icon-video-small-prev.png" target="icon-video-small-prev.png" />
+      <resource-file src="res/icon-video-small-play.png" target="icon-video-small-play.png" />
+      <resource-file src="res/icon-video-replay.png" target="icon-video-replay.png" />
 
       <info>
       </info>
@@ -69,8 +71,19 @@
 
     <!-- android -->
     <platform name="android">
-      <js-module src="www/plugin.js" name="videobox">
-        <clobbers target="videobox" />
-      </js-module>
+      <config-file target="config.xml" parent="/*">
+        <feature name="Videobox">
+          <param name="android-package" value="com.makeblock.neuron.videobox.FloatingVideoBox"/>
+        </feature>
+      </config-file>
+
+      <source-file src="src/android/com/makeblock/neuron/videobox/FloatingVideoBox.java" target-dir="src/com/makeblock/neuron/videobox"/>
+      <source-file src="src/android/com/makeblock/neuron/videobox/FloatingVideoBoxView.java" target-dir="src/com/makeblock/neuron/videobox"/>
+      <resource-file src="src/android/drawable/" target="res/drawable-mdpi"/>
+      <resource-file src="src/android/layout/" target="res/layout"/>
+      <resource-file src="res/icon-video-big-fullscreen.png" target="res/drawable-mdpi/icon_video_big_fullscreen.png"/>
+      <resource-file src="res/icon-video-small-fullscreen.png" target="res/drawable-mdpi/icon_video_small_fullscreen.png"/>
+      <resource-file src="res/icon-video-replay.png" target="res/drawable-mdpi/icon_video_replay.png"/>
     </platform>
+
 </plugin>
