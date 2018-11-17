@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -58,10 +59,21 @@ public class FloatingVideoBoxView extends FrameLayout {
     private float relativeHeight;
     private float relativeWidth;
 
+    private boolean hidden = false;
+
     public FloatingVideoBoxView(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public FloatingVideoBoxView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public FloatingVideoBoxView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+
         mode = PLAYER_MODE.NORMAL;
-        this.view = inflate(getContext(), R.layout.floating_video_box_layout,null);
+        this.view = inflate(getContext(), R.layout.floating_video_box_layout, null);
         addView(this.view);
 
         initPlayer();
@@ -74,6 +86,12 @@ public class FloatingVideoBoxView extends FrameLayout {
     @SuppressLint("ClickableViewAccessibility")
     private void initButtons() {
         this.btnToggleFullScreen = findViewById(R.id.btn_video_toggle_fullscreen);
+//        this.btnToggleFullScreen = new Button(getContext());
+//        this.btnToggleFullScreen.setBackground(getResources().getDrawable(R.drawable.icon_video_small_fullscreen));
+//        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(30, 30);
+//        lp.gravity = Gravity.RIGHT;
+//        lp.setMargins(7,7,7,7);
+//        this.btnToggleFullScreen.setLayoutParams(lp);
         this.btnToggleFullScreen.setVisibility(View.GONE);
         this.btnToggleFullScreen.setOnTouchListener(new OnTouchListener() {
             @Override
@@ -84,6 +102,7 @@ public class FloatingVideoBoxView extends FrameLayout {
                 return true;
             }
         });
+//        this.view.addView(this.btnToggleFullScreen);
 
         this.btnReplay = findViewById(R.id.btn_video_replay);
         this.btnReplay.setVisibility(View.GONE);
@@ -97,6 +116,8 @@ public class FloatingVideoBoxView extends FrameLayout {
                 return true;
             }
         });
+
+//        this.view.addView(this.btnReplay);
     }
 
     private void initScreenSizeVariable(Activity context) {
@@ -116,6 +137,11 @@ public class FloatingVideoBoxView extends FrameLayout {
 
     private void initHolder() {
         videoContainer = this.findViewById(R.id.video_container);
+//        videoContainer = new SurfaceView(getContext());
+//        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+//        lp.gravity = Gravity.CENTER;
+//        videoContainer.setLayoutParams(lp);
+//        this.view.addView(videoContainer);
         videoContainer.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -138,7 +164,7 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     private void initPlayer() {
-        final Activity context = (Activity)this.getContext();
+        final Activity context = (Activity) this.getContext();
         player = new MediaPlayer();
 //        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -158,8 +184,7 @@ public class FloatingVideoBoxView extends FrameLayout {
             public void onCompletion(MediaPlayer mp) {
                 if (autoloop()) {
                     player.start();
-                }
-                else {
+                } else {
                     context.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -180,29 +205,35 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     private void enterNormal() {
-        ViewGroup.LayoutParams params = this.getLayoutParams();
-        params.height = (int)this.calculateByHeight(NORMAL_PARAM.height);
-        params.width = (int)this.calculateByHeight(NORMAL_PARAM.width);
-        this.setLayoutParams(params);
+        this.relativeWidth = this.calculateByHeight(NORMAL_PARAM.width);
+        this.relativeHeight = this.calculateByHeight(NORMAL_PARAM.height);
+
+        ViewGroup.LayoutParams params = this.view.getLayoutParams();
+
+        params.height = (int) this.relativeHeight;
+        params.width = (int) this.relativeWidth;
+        this.view.setLayoutParams(params);
+        Log.d(TAG, "after enterNormal set width:" + this.view.getWidth());
+
         this.positionRightTop();
 
         this.view.setBackground(getResources().getDrawable(R.drawable.floating_video_border));
-        this.view.setPadding((int)normalPadding, (int)normalPadding, (int)normalPadding, (int)normalPadding);
+        this.view.setPadding((int) normalPadding, (int) normalPadding, (int) normalPadding, (int) normalPadding);
 
-       this.modifyButtonsToNormal();
+        this.modifyButtonsToNormal();
     }
 
     private void modifyButtonsToNormal() {
         this.btnToggleFullScreen.setBackground(getResources().getDrawable(R.drawable.icon_video_small_fullscreen));
         ViewGroup.LayoutParams btnToggleFulllScreenParams = this.btnToggleFullScreen.getLayoutParams();
-        btnToggleFulllScreenParams.width = (int)fullScreenBtnSizeNormal;
-        btnToggleFulllScreenParams.height = (int)fullScreenBtnSizeNormal;
+        btnToggleFulllScreenParams.width = (int) fullScreenBtnSizeNormal;
+        btnToggleFulllScreenParams.height = (int) fullScreenBtnSizeNormal;
         this.btnToggleFullScreen.setLayoutParams(btnToggleFulllScreenParams);
         this.btnToggleFullScreen.setVisibility(View.VISIBLE);
 
         ViewGroup.LayoutParams btnReplayParams = this.btnReplay.getLayoutParams();
-        btnReplayParams.width = (int)replayBtnSizeNormal;
-        btnReplayParams.height = (int)replayBtnSizeNormal;
+        btnReplayParams.width = (int) replayBtnSizeNormal;
+        btnReplayParams.height = (int) replayBtnSizeNormal;
         this.btnReplay.setLayoutParams(btnReplayParams);
     }
 
@@ -212,11 +243,12 @@ public class FloatingVideoBoxView extends FrameLayout {
 //        params.height = (int)this.relativeHeight;
 //        this.setLayoutParams(params);
 
-        this.setX(this.relativeX);
-        this.setY(this.relativeY);
+//        this.view.setX(this.relativeX);
+//        this.view.setY(this.relativeY);
+        this.setViewPosition(Math.round(this.relativeX), Math.round(this.relativeY));
 
         this.view.setBackgroundResource(0);
-        this.view.setPadding(0,0,0,0);
+        this.view.setPadding(0, 0, 0, 0);
 
         this.modifyButtonsToVideoOnly();
     }
@@ -227,13 +259,16 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     private void enterFullScreen() {
-        ViewGroup.LayoutParams params = this.getLayoutParams();
-        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        this.setLayoutParams(params);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+        FrameLayout.LayoutParams params = (LayoutParams) this.view.getLayoutParams();
+        params.height = displayMetrics.heightPixels;
+        params.width = displayMetrics.widthPixels;
+        this.view.setLayoutParams(params);
         this.positionLeftTop();
         this.view.setBackground(null);
-        this.view.setPadding(0,0,0,0);
+        this.view.setPadding(0, 0, 0, 0);
 
         this.modifyButtonsToFullScreen();
     }
@@ -241,22 +276,21 @@ public class FloatingVideoBoxView extends FrameLayout {
     private void modifyButtonsToFullScreen() {
         this.btnToggleFullScreen.setBackground(getResources().getDrawable(R.drawable.icon_video_big_fullscreen));
         ViewGroup.LayoutParams btnToggleFulllScreenParams = this.btnToggleFullScreen.getLayoutParams();
-        btnToggleFulllScreenParams.width = (int)fullScreenBtnSizeFullScreen;
-        btnToggleFulllScreenParams.height = (int)fullScreenBtnSizeFullScreen;
+        btnToggleFulllScreenParams.width = (int) fullScreenBtnSizeFullScreen;
+        btnToggleFulllScreenParams.height = (int) fullScreenBtnSizeFullScreen;
         this.btnToggleFullScreen.setLayoutParams(btnToggleFulllScreenParams);
         this.btnToggleFullScreen.setVisibility(View.VISIBLE);
 
         ViewGroup.LayoutParams btnReplayParams = this.btnReplay.getLayoutParams();
-        btnReplayParams.width = (int)replayBtnSizeFullScreen;
-        btnReplayParams.height = (int)replayBtnSizeFullScreen;
+        btnReplayParams.width = (int) replayBtnSizeFullScreen;
+        btnReplayParams.height = (int) replayBtnSizeFullScreen;
         this.btnReplay.setLayoutParams(btnReplayParams);
     }
 
     private void toggleFullScreen() {
         if (this.mode == PLAYER_MODE.FULLSCREEN) {
             this.setMode(PLAYER_MODE.NORMAL);
-        }
-        else if (this.mode == PLAYER_MODE.NORMAL) {
+        } else if (this.mode == PLAYER_MODE.NORMAL) {
             this.setMode(PLAYER_MODE.FULLSCREEN);
         }
     }
@@ -275,28 +309,55 @@ public class FloatingVideoBoxView extends FrameLayout {
         }
     }
 
+    private void setViewPosition(int x, int y) {
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)this.view.getLayoutParams();
+
+        int width = (int)this.relativeWidth;
+        int height = (int)this.relativeHeight;
+
+        if (this.mode == PLAYER_MODE.FULLSCREEN) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            height = displayMetrics.heightPixels;
+            width = displayMetrics.widthPixels;
+        }
+        else if (this.hidden) {
+            width = 0;
+            height = 0;
+        }
+
+        params.leftMargin = x;
+        params.topMargin = y;
+        params.rightMargin = x + width;
+        params.bottomMargin = y + height;
+
+        this.view.setLayoutParams(params);
+    }
+
     private void positionLeftTop() {
-        this.setX(0);
-        this.setY(0);
+        this.setViewPosition(0, 0);
     }
 
     private void positionRightTop() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity)getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenHeight = displayMetrics.heightPixels;
         int screenWidth = displayMetrics.widthPixels;
 
-        int x = screenWidth - this.getLayoutParams().width;
-        this.setY(0);
-        this.setX(x);
+        int x = screenWidth - (int)this.relativeWidth;//this.view.getWidth();
+        this.setViewPosition(x, 0);
     }
 
     private float calculateByHeight(float num) {
         return num / 768 * screenHeight;
+//        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+//        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, num, currentMetric);
     }
 
     private float calculateByWidth(float num) {
         return num / 1024 * sceenWidth;
+//        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+//        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, num, currentMetric);
     }
 
     private void hideContainer() {
@@ -314,11 +375,12 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     public void show() {
+        this.hidden = false;
         if (this.mode == PLAYER_MODE.VIDEOONLY) {
-            ViewGroup.LayoutParams params = this.getLayoutParams();
-            params.width = (int)this.relativeWidth;
-            params.height = (int)this.relativeHeight;
-            this.setLayoutParams(params);
+            ViewGroup.LayoutParams params = this.view.getLayoutParams();
+            params.width = (int) this.relativeWidth;
+            params.height = (int) this.relativeHeight;
+            this.view.setLayoutParams(params);
         }
 
         this.toggleDisplayByMode();
@@ -330,10 +392,11 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     public void hide() {
-        ViewGroup.LayoutParams params = this.getLayoutParams();
+        this.hidden = true;
+        ViewGroup.LayoutParams params = this.view.getLayoutParams();
         params.width = 0;
         params.height = 0;
-        this.setLayoutParams(params);
+        this.view.setLayoutParams(params);
         this.positionLeftTop();
 //        this.videoContainer.setVisibility(View.INVISIBLE);
         this.hideContainer();
@@ -347,67 +410,94 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     public void setWidth(int width) {
-        this.relativeWidth = this.calculateByWidth((width));
+        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+        this.relativeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width, currentMetric);
 
-        ViewGroup.LayoutParams params = this.getLayoutParams();
-        params.width = (int)this.relativeWidth;
-        this.setLayoutParams(params);
+        ViewGroup.LayoutParams params = this.view.getLayoutParams();
+        params.width = (int) this.relativeWidth;
+        this.view.setLayoutParams(params);
     }
 
     public void setHeight(int height) {
-        this.relativeHeight = this.calculateByHeight(height);
+        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+        this.relativeHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, height, currentMetric);
 
-        ViewGroup.LayoutParams params = this.getLayoutParams();
-        params.height = (int)this.relativeHeight;
-        this.setLayoutParams(params);
+        ViewGroup.LayoutParams params = this.view.getLayoutParams();
+        params.height = (int) this.relativeHeight;
+        this.view.setLayoutParams(params);
     }
 
     public void setRelativeX(float x) {
-        this.relativeX = this.calculateByWidth(x);
-        this.setX(this.relativeX);
+        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+        this.relativeX = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, x, currentMetric);
+
+        int left = Math.round(this.relativeX);
+        int top = this.view.getTop();
+
+        this.setViewPosition(left, top);
     }
 
     public void setRelativeY(float y) {
-        this.relativeY = this.calculateByHeight(y);
-        this.setY(this.relativeY);
+        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
+        this.relativeY = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, y, currentMetric);
+
+        int left = this.view.getLeft();
+        int top = Math.round(this.relativeY);
+
+        this.setViewPosition(left, top);
     }
 
     public void playAssetVideo(AssetFileDescriptor afd) {
         try {
             player.reset();
-            player.setDataSource(afd.getFileDescriptor(),afd.getStartOffset(), afd.getLength());
+            player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
             player.prepare();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN:
-                dX = this.getX() - event.getRawX();
-                dY = this.getY() - event.getRawY();
-                lastAction = MotionEvent.ACTION_DOWN;
-                break;
 
-            case MotionEvent.ACTION_MOVE:
-                if (draggable()) {
-                    this.setY(event.getRawY() + dY);
-                    this.setX(event.getRawX() + dX);
-                }
-                lastAction = MotionEvent.ACTION_MOVE;
-                break;
 
-            case MotionEvent.ACTION_UP:
-                lastAction = MotionEvent.ACTION_UP;
-                break;
+        int height = this.view.getHeight();
+        int width = this.view.getWidth();
 
-            default:
-                return false;
+        int left = Math.round(this.view.getX());
+        int top = Math.round(this.view.getY());
+        int right = left + height;
+        int bottom = top + width;
+
+        int x = Math.round(event.getX());
+        int y = Math.round(event.getY());
+
+        if ((x > left) && (x < right) && (y > top) && (y < bottom)) {
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    dX = this.view.getX() - event.getRawX();
+                    dY = this.view.getY() - event.getRawY();
+                    lastAction = MotionEvent.ACTION_DOWN;
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    if (draggable()) {
+
+                        this.setViewPosition( Math.round(x + dX), Math.round(y + dY));
+                    }
+                    lastAction = MotionEvent.ACTION_MOVE;
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    lastAction = MotionEvent.ACTION_UP;
+                    break;
+
+                default:
+                    return false;
+            }
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override

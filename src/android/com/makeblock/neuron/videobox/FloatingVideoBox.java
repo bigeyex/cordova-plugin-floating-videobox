@@ -3,6 +3,8 @@ package com.makeblock.neuron.videobox;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.Color;
 import android.media.MediaPlayer;
+import android.support.annotation.NonNull;
+import android.support.v4.widget.ViewDragHelper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -33,10 +35,9 @@ public class FloatingVideoBox extends CordovaPlugin {
     public void initialize(final CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
 
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(0, 0);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
 
-        view = new FloatingVideoBoxView(cordova.getActivity());
-        view.setBackgroundColor(Color.parseColor("#ffffff"));
+        view = new FloatingVideoBoxView(this.cordova.getActivity());
         view.setLayoutParams(lp);
 
         this.cordova.getActivity().runOnUiThread(new Runnable() {
