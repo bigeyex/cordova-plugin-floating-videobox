@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -86,12 +87,6 @@ public class FloatingVideoBoxView extends FrameLayout {
     @SuppressLint("ClickableViewAccessibility")
     private void initButtons() {
         this.btnToggleFullScreen = findViewById(R.id.btn_video_toggle_fullscreen);
-//        this.btnToggleFullScreen = new Button(getContext());
-//        this.btnToggleFullScreen.setBackground(getResources().getDrawable(R.drawable.icon_video_small_fullscreen));
-//        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(30, 30);
-//        lp.gravity = Gravity.RIGHT;
-//        lp.setMargins(7,7,7,7);
-//        this.btnToggleFullScreen.setLayoutParams(lp);
         this.btnToggleFullScreen.setVisibility(View.GONE);
         this.btnToggleFullScreen.setOnTouchListener(new OnTouchListener() {
             @Override
@@ -137,11 +132,6 @@ public class FloatingVideoBoxView extends FrameLayout {
 
     private void initHolder() {
         videoContainer = this.findViewById(R.id.video_container);
-//        videoContainer = new SurfaceView(getContext());
-//        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//        lp.gravity = Gravity.CENTER;
-//        videoContainer.setLayoutParams(lp);
-//        this.view.addView(videoContainer);
         videoContainer.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
@@ -153,6 +143,7 @@ public class FloatingVideoBoxView extends FrameLayout {
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                 Log.d(TAG, "surfaceChanged=" + System.currentTimeMillis());
+                player.setDisplay(holder);
             }
 
             @Override
@@ -166,7 +157,7 @@ public class FloatingVideoBoxView extends FrameLayout {
     private void initPlayer() {
         final Activity context = (Activity) this.getContext();
         player = new MediaPlayer();
-//        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
         player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
@@ -194,6 +185,22 @@ public class FloatingVideoBoxView extends FrameLayout {
                 }
             }
         });
+        player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.d(TAG,"MediaPlayer onError " + what + " " + extra);
+                return false;
+            }
+        });
+        player.setOnInfoListener(new MediaPlayer.OnInfoListener() {
+            @Override
+            public boolean onInfo(MediaPlayer mp, int what, int extra) {
+                Log.d(TAG,"MediaPlayer onInfo " + what + " " + extra);
+                return false;
+            }
+        });
+
+        player.setScreenOnWhilePlaying(true);
     }
 
     private boolean autoloop() {
@@ -365,6 +372,7 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.height = 0;
         params.width = 0;
         this.videoContainer.setLayoutParams(params);
+        this.videoContainer.setVisibility(GONE);
     }
 
     private void restoreContainer() {
@@ -372,6 +380,7 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         this.videoContainer.setLayoutParams(params);
+        this.videoContainer.setVisibility(VISIBLE);
     }
 
     public void show() {
@@ -448,10 +457,11 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     public void playAssetVideo(AssetFileDescriptor afd) {
+        Log.d(TAG, "playAssetVideo " + afd.getFileDescriptor() + " " + afd.getStartOffset() +" "+ afd.getLength());
         try {
             player.reset();
             player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-            player.prepare();
+            player.prepareAsync();
         } catch (Exception e) {
             e.printStackTrace();
         }
