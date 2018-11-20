@@ -62,6 +62,8 @@ public class FloatingVideoBoxView extends FrameLayout {
 
     private boolean hidden = false;
 
+    private AssetFileDescriptor currentFileDescriptor;
+
     public FloatingVideoBoxView(Context context) {
         this(context, null);
     }
@@ -200,7 +202,7 @@ public class FloatingVideoBoxView extends FrameLayout {
             }
         });
 
-        player.setScreenOnWhilePlaying(true);
+//        player.setScreenOnWhilePlaying(true);
     }
 
     private boolean autoloop() {
@@ -381,6 +383,18 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         this.videoContainer.setLayoutParams(params);
         this.videoContainer.setVisibility(VISIBLE);
+        this.playCurrentFile();
+    }
+
+    private void playCurrentFile() {
+        try {
+            player.reset();
+            player.setDataSource(this.currentFileDescriptor.getFileDescriptor(),
+                    this.currentFileDescriptor.getStartOffset(), this.currentFileDescriptor.getLength());
+            player.prepareAsync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void show() {
@@ -458,13 +472,8 @@ public class FloatingVideoBoxView extends FrameLayout {
 
     public void playAssetVideo(AssetFileDescriptor afd) {
         Log.d(TAG, "playAssetVideo " + afd.getFileDescriptor() + " " + afd.getStartOffset() +" "+ afd.getLength());
-        try {
-            player.reset();
-            player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-            player.prepareAsync();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.currentFileDescriptor = afd;
+        this.playCurrentFile();
     }
 
     @Override
