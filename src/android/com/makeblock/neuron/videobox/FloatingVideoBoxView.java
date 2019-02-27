@@ -20,6 +20,9 @@ import android.widget.FrameLayout;
 
 import com.makeblock.neuron.R;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 /**
  * Created by liguomin on 2018/11/7.
  */
@@ -99,7 +102,6 @@ public class FloatingVideoBoxView extends FrameLayout {
                 return true;
             }
         });
-//        this.view.addView(this.btnToggleFullScreen);
 
         this.btnReplay = findViewById(R.id.btn_video_replay);
         this.btnReplay.setVisibility(View.GONE);
@@ -114,7 +116,6 @@ public class FloatingVideoBoxView extends FrameLayout {
             }
         });
 
-//        this.view.addView(this.btnReplay);
     }
 
     private void initScreenSizeVariable(Activity context) {
@@ -129,7 +130,6 @@ public class FloatingVideoBoxView extends FrameLayout {
         fullScreenBtnSizeFullScreen = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 54, currentMetric);
         replayBtnSizeNormal = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 65, currentMetric);
         replayBtnSizeFullScreen = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 85, currentMetric);
-//        normalPadding = 3 * getResources().getDisplayMetrics().density;
     }
 
     private void initHolder() {
@@ -202,7 +202,6 @@ public class FloatingVideoBoxView extends FrameLayout {
             }
         });
 
-//        player.setScreenOnWhilePlaying(true);
     }
 
     private boolean autoloop() {
@@ -247,13 +246,6 @@ public class FloatingVideoBoxView extends FrameLayout {
     }
 
     private void enterVideoOnly() {
-//        ViewGroup.LayoutParams params = this.getLayoutParams();
-//        params.width = (int)this.relativeWidth;
-//        params.height = (int)this.relativeHeight;
-//        this.setLayoutParams(params);
-
-//        this.view.setX(this.relativeX);
-//        this.view.setY(this.relativeY);
         this.setViewPosition(Math.round(this.relativeX), Math.round(this.relativeY));
 
         this.view.setBackgroundResource(0);
@@ -359,14 +351,10 @@ public class FloatingVideoBoxView extends FrameLayout {
 
     private float calculateByHeight(float num) {
         return num / 768 * screenHeight;
-//        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
-//        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, num, currentMetric);
     }
 
     private float calculateByWidth(float num) {
         return num / 1024 * sceenWidth;
-//        DisplayMetrics currentMetric = getResources().getDisplayMetrics();
-//        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, num, currentMetric);
     }
 
     private void hideContainer() {
@@ -374,7 +362,6 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.height = 0;
         params.width = 0;
         this.videoContainer.setLayoutParams(params);
-        this.videoContainer.setVisibility(GONE);
     }
 
     private void restoreContainer() {
@@ -382,8 +369,6 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
         params.width = ViewGroup.LayoutParams.MATCH_PARENT;
         this.videoContainer.setLayoutParams(params);
-        this.videoContainer.setVisibility(VISIBLE);
-        this.playCurrentFile();
     }
 
     private void playCurrentFile() {
@@ -407,10 +392,6 @@ public class FloatingVideoBoxView extends FrameLayout {
         }
 
         this.toggleDisplayByMode();
-//        this.videoContainer.setVisibility(View.VISIBLE);
-//
-//        this.setVisibility(View.VISIBLE);
-//        this.view.setVisibility(View.VISIBLE);
         this.restoreContainer();
     }
 
@@ -421,10 +402,7 @@ public class FloatingVideoBoxView extends FrameLayout {
         params.height = 0;
         this.view.setLayoutParams(params);
         this.positionLeftTop();
-//        this.videoContainer.setVisibility(View.INVISIBLE);
         this.hideContainer();
-//        this.setVisibility(View.GONE);
-//        this.view.setVisibility(View.GONE);
     }
 
     public void setMode(PLAYER_MODE mode) {
@@ -474,6 +452,20 @@ public class FloatingVideoBoxView extends FrameLayout {
         Log.d(TAG, "playAssetVideo " + afd.getFileDescriptor() + " " + afd.getStartOffset() +" "+ afd.getLength());
         this.currentFileDescriptor = afd;
         this.playCurrentFile();
+    }
+
+    public void playUrlVideo(String url) {
+        try {
+            File file = new File(url);
+            FileInputStream inputStream = new FileInputStream(file);
+            player.reset();
+            player.setDataSource(inputStream.getFD());
+            player.prepareAsync();
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

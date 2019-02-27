@@ -117,9 +117,10 @@ public class FloatingVideoBox extends CordovaPlugin {
 
     private void playVideo(String path) {
         try {
-            AssetFileDescriptor afd = cordova.getActivity().getAssets().openFd(path);
-            view.playAssetVideo(afd);
-        } catch (IOException e) {
+//            AssetFileDescriptor afd = cordova.getActivity().getAssets().openFd(path);
+//            view.playAssetVideo(afd);
+            view.playUrlVideo(path.substring("file://".length()));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

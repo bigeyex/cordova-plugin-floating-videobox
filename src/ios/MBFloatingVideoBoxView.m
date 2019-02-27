@@ -259,7 +259,7 @@ static float replayButtonHeightRatioFullScreen = 0.1107;
 }
 
 - (void)playBundleVideo: (NSString*)location {
-    NSURL *fileURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",[[NSBundle mainBundle] resourceURL], location]];
+    NSURL *fileURL = [NSURL URLWithString:location];
     [self.avPlayerView playVideoWithURL:fileURL];
 }
 
